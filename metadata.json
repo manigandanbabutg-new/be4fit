@@ -1,0 +1,6 @@
+{
+  "name": "Voice Fitness Trainer for Blind Users",
+  "description": "A fully voice-guided and voice-controlled workout generator and trainer for blind and visually impaired individuals.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

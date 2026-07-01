@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Fitness Trainer for Blind Users</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons via ESM -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500;800&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Simple high contrast focus ring for keyboard navigation */
+    *:focus {
+      outline: 4px solid #fbbf24 !important;
+      outline-offset: 4px !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-stone-950 text-stone-100 flex flex-col relative selection:bg-amber-400 selection:text-stone-950">
+
+  <!-- Accessible Screen Reader Announcement Live Region -->
+  <div id="sr-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Top Accessible Header -->
+  <header class="border-b border-stone-800 bg-stone-900/80 backdrop-blur-md px-6 py-4 sticky top-0 z-40 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="bg-amber-500 text-stone-950 p-2.5 rounded-xl font-bold flex items-center justify-center shadow-lg shadow-amber-500/10">
+        <i data-lucide="activity" class="w-6 h-6 stroke-[2.5]"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-black tracking-tight text-white flex items-center gap-2 font-display">
+          Voice Fitness <span class="text-amber-400 text-xs px-2 py-0.5 rounded-full border border-amber-400/30 uppercase font-mono">Blind Edition</span>
+        </h1>
+        <p class="text-xs text-stone-400 font-medium">Fully Voice-Guided Workout Coach</p>
+      </div>
+    </div>
+
+    <!-- Global Speed Modifier Control -->
+    <div class="flex items-center gap-2">
+      <button id="help-btn" class="p-3 bg-stone-800 hover:bg-stone-700 text-stone-200 hover:text-white rounded-xl transition-all border border-stone-700/60 flex items-center gap-2 text-sm font-semibold min-h-[44px]" aria-label="Speak manual instructions">
+        <i data-lucide="help-circle" class="w-5 h-5 text-amber-400"></i>
+        <span class="hidden sm:inline">Commands Help</span>
+      </button>
+
+      <div id="speed-controls" class="hidden flex items-center bg-stone-800/80 border border-stone-700/60 rounded-xl p-1 gap-1">
+        <button id="slow-down-btn" class="px-2.5 py-1.5 hover:bg-stone-700 rounded-lg text-xs font-bold text-stone-300" aria-label="Slower voice speech rate">
+          Slower
+        </button>
+        <span id="speed-indicator" class="text-xs font-mono px-1.5 text-amber-400 font-bold" aria-label="Current speech speed 100 percent">
+          100%
+        </span>
+        <button id="speed-up-btn" class="px-2.5 py-1.5 hover:bg-stone-700 rounded-lg text-xs font-bold text-stone-300" aria-label="Faster voice speech rate">
+          Faster
+        </button>
+      </div>
+
+      <!-- Ambient Jazz Music Player -->
+      <div id="jazz-music-control" class="hidden flex items-center bg-stone-800/80 border border-stone-700/60 rounded-xl p-1 gap-1 ml-1">
+        <button id="toggle-jazz-btn" class="px-2.5 py-1.5 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg flex items-center gap-1.5 text-xs font-bold min-h-[36px]" aria-label="Toggle Jazz Theme Background Music">
+          <i id="jazz-icon" data-lucide="music" class="w-4 h-4 text-amber-400"></i>
+          <span id="jazz-btn-text">Jazz Off</span>
+        </button>
+        <div class="flex items-center gap-1.5 border-l border-stone-700/60 pl-2 pr-1.5">
+          <i data-lucide="volume-1" class="w-3.5 h-3.5 text-stone-400"></i>
+          <input id="jazz-volume-slider" type="range" min="0" max="100" value="35" class="w-14 md:w-20 accent-amber-400 h-1 rounded cursor-pointer" aria-label="Jazz Background Music Volume">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-8 flex flex-col justify-center">
+
+    <!-- STEP 1: Pre-onboard State -->
+    <div id="onboard-screen" class="bg-stone-900 border-2 border-stone-800 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden my-auto max-w-xl mx-auto">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative z-10">
+        <div class="w-20 h-20 bg-amber-400 text-stone-950 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-amber-400/20">
+          <i data-lucide="volume-2" class="w-10 h-10 stroke-[2.5]"></i>
+        </div>
+        <h2 class="text-3xl font-black text-white tracking-tight mb-4 leading-tight font-display">
+          Start Voice Fitness Trainer
+        </h2>
+        <p class="text-stone-300 text-base mb-8 leading-relaxed">
+          Welcome. This application is custom-designed for blind, low-vision, and visually impaired users. It delivers full, descriptive audio guidance and responds entirely to your spoken voice commands.
+        </p>
+        <button id="activate-btn" class="w-full sm:w-auto px-8 py-5 bg-amber-400 text-stone-950 hover:bg-amber-300 font-extrabold text-xl rounded-2xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 min-h-[64px]" aria-describedby="activation-instructions">
+          <i data-lucide="play" class="w-6 h-6 fill-stone-950 stroke-[2.5]"></i>
+          Activate Voice Guidance
+        </button>
+        <p id="activation-instructions" class="text-xs text-stone-500 mt-6 font-medium">
+          Tapping this activates your browser's audio synthesizer, unlocks the microphone, and speaks instructions to guide you.
+        </p>
+      </div>
+    </div>
+
+    <!-- MAIN INTERACTIVE APP ZONE (Hidden until Onboarded) -->
+    <div id="app-zone" class="hidden w-full flex-1 flex flex-col justify-center gap-6">
+
+      <!-- Active Voice Assistant Transcript Indicator -->
+      <div class="bg-stone-900/90 border border-stone-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-lg">
+        <div class="flex items-center gap-3">
+          <div id="voice-pulse" class="relative flex items-center justify-center w-10 h-10 rounded-full bg-stone-800 text-stone-400">
+            <i id="mic-icon-active" data-lucide="mic" class="w-5 h-5"></i>
+            <i id="mic-icon-inactive" data-lucide="mic-off" class="w-5 h-5 hidden"></i>
+            <span id="ping-ring" class="hidden absolute inset-0 rounded-full bg-red-500/30 animate-ping"></span>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-stone-400 uppercase tracking-wider">Voice Command Status</div>
+            <div id="voice-status-text" class="text-sm font-bold text-stone-200 font-mono">
+              Voice recognition standby
+            </div>
+          </div>
+        </div>
+
+        <button id="toggle-mic-btn" class="px-5 py-3 rounded-xl font-black text-sm flex items-center gap-2.5 transition-all shadow-md bg-amber-400 text-stone-950 hover:bg-amber-300 min-h-[48px]" aria-label="Start listening for voice command">
+          <i data-lucide="mic" class="w-4 h-4 stroke-[2.5]"></i>
+          Speak Command <span class="hidden lg:inline text-[10px] px-1.5 py-0.5 rounded bg-stone-950/25 ml-1">Spacebar x2</span>
+        </button>
+      </div>
+
+      <!-- Captions Transcript Panel -->
+      <div id="transcript-panel" class="hidden bg-stone-900 border-l-4 border-amber-400 p-4 rounded-r-2xl shadow-sm">
+        <span class="text-xs font-extrabold text-amber-400 uppercase block tracking-wider mb-1">What I heard / Status</span>
+        <p id="transcript-text" class="text-lg md:text-xl font-bold text-stone-100 font-serif leading-relaxed italic">
+          ""
+        </p>
+      </div>
+
+      <!-- ERROR DISPLAY -->
+      <div id="api-error" class="hidden bg-red-950/50 border border-red-500/30 p-4 rounded-2xl text-red-300 text-sm font-semibold"></div>
+
+      <!-- PLAYING ACTIVE WORKOUT SCREEN -->
+      <div id="player-screen" class="hidden bg-stone-900 border-2 border-amber-400 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden flex-1 flex flex-col justify-between min-h-[420px]">
+        <div id="phase-bar" class="absolute top-0 inset-x-0 h-2.5 bg-amber-500"></div>
+
+        <div class="flex items-center justify-between mt-2">
+          <span id="workout-title-badge" class="text-xs font-mono font-bold uppercase px-3 py-1 bg-stone-800 rounded-full text-stone-300 border border-stone-700/50">
+            Workout Title
+          </span>
+          <span id="exercise-progress-badge" class="text-sm font-mono font-bold text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full">
+            Exercise 1 of 5
+          </span>
+        </div>
+
+        <div class="my-auto py-6 text-center flex flex-col items-center">
+          <span id="phase-label" class="text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 inline-block bg-amber-400/20 text-amber-400 border border-amber-400/30">
+            Get Ready
+          </span>
+
+          <h2 id="exercise-title" class="text-3xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight font-display">
+            Exercise Name
+          </h2>
+
+          <div class="text-7xl md:text-9xl font-black font-mono tracking-tighter text-amber-400 my-4 flex items-center justify-center">
+            <span id="timer-number">10</span>
+            <span class="text-xl md:text-3xl font-extrabold text-stone-500 ml-2">seconds</span>
+          </div>
+
+          <div class="bg-stone-950/80 p-5 rounded-2xl border border-stone-800 max-w-2xl w-full text-left my-4">
+            <span class="text-xs font-bold text-stone-500 uppercase block tracking-wider mb-1">Guided Audio Script</span>
+            <p id="audio-script-text" class="text-base text-stone-200 leading-relaxed font-medium">
+              Get into position...
+            </p>
+            <div id="safety-tip-box" class="hidden mt-2">
+              <p class="text-sm text-amber-400 font-bold flex items-start gap-1.5">
+                <span class="font-extrabold uppercase">Form Safety Check:</span> <span id="safety-tip-text">Keep your knees aligned</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accessible Navigation Keys -->
+        <div class="border-t border-stone-800/80 pt-6 flex flex-wrap justify-center items-center gap-4">
+          <button id="prev-exercise-btn" class="p-4 bg-stone-800 hover:bg-stone-700 text-white rounded-2xl transition-all min-h-[56px] flex items-center gap-2 text-base font-extrabold">
+            <i data-lucide="rotate-ccw" class="w-5 h-5 text-stone-400"></i>
+            <span>Back (B Key)</span>
+          </button>
+
+          <button id="pause-workout-btn" class="px-8 py-4 rounded-2xl font-black text-lg shadow-lg flex items-center gap-2.5 transition-all bg-amber-400 text-stone-950 hover:bg-amber-300 min-h-[56px]" aria-label="Pause Exercise">
+            <i id="pause-icon" data-lucide="pause" class="w-6 h-6 fill-stone-950"></i>
+            <i id="play-icon" data-lucide="play" class="w-6 h-6 fill-stone-950 hidden"></i>
+            <span id="pause-btn-text">Pause (P Key)</span>
+          </button>
+
+          <button id="skip-exercise-btn" class="p-4 bg-stone-800 hover:bg-stone-700 text-white rounded-2xl transition-all min-h-[56px] flex items-center gap-2 text-base font-extrabold">
+            <span>Skip (N Key)</span>
+            <i data-lucide="skip-forward" class="w-5 h-5 text-stone-400"></i>
+          </button>
+
+          <button id="exit-workout-btn" class="px-5 py-4 bg-red-950/40 text-red-400 hover:bg-red-900/30 rounded-2xl transition-all border border-red-900/50 min-h-[56px] text-base font-extrabold">
+            Exit Session
+          </button>
+        </div>
+      </div>
+
+      <!-- HOME DASHBOARD SCREEN -->
+      <div id="home-dashboard" class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+        
+        <!-- Custom Workout Voice Generator -->
+        <div class="bg-stone-900 border border-stone-800 rounded-3xl p-6 md:p-8 md:col-span-7 flex flex-col justify-between relative overflow-hidden shadow-xl">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="relative z-10">
+            <div class="flex items-center gap-2.5 mb-4">
+              <div class="bg-amber-400/10 text-amber-400 p-2 rounded-xl">
+                <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+              </div>
+              <h3 class="text-xl font-extrabold text-white font-display">Create Custom Voice Workout</h3>
+            </div>
+
+            <p class="text-stone-400 text-sm mb-6 leading-relaxed">
+              Speak or type anything you want to work on. Gemini AI compiles descriptive verbal coaching guidelines designed specifically for visually impaired coordination.
+            </p>
+
+            <!-- Quick Voice Shortcuts suggestions -->
+            <div class="mb-6">
+              <span class="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-2">Try saying or clicking:</span>
+              <div class="flex flex-wrap gap-2">
+                <button class="suggestion-btn text-xs font-semibold bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white px-3 py-2 rounded-xl transition-all border border-stone-700/40" data-prompt="6-minute upper body stretching" data-duration="6">
+                  "6-minute upper body stretching"
+                </button>
+                <button class="suggestion-btn text-xs font-semibold bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white px-3 py-2 rounded-xl transition-all border border-stone-700/40" data-prompt="10-minute chair cardio" data-duration="10">
+                  "10-minute chair cardio"
+                </button>
+                <button class="suggestion-btn text-xs font-semibold bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white px-3 py-2 rounded-xl transition-all border border-stone-700/40" data-prompt="5-minute core balance stretch" data-duration="5">
+                  "5-minute core balance stretch"
+                </button>
+                <button class="suggestion-btn text-xs font-semibold bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white px-3 py-2 rounded-xl transition-all border border-stone-700/40" data-prompt="12-minute joint release" data-duration="12">
+                  "12-minute joint release"
+                </button>
+              </div>
+            </div>
+
+            <!-- Manual Form Fields -->
+            <div class="space-y-4">
+              <div>
+                <label for="prompt-input" class="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">
+                  Focus Area or Preferences
+                </label>
+                <input
+                  id="prompt-input"
+                  type="text"
+                  placeholder="e.g. gentle spine stretch, dynamic high impact legs"
+                  class="w-full bg-stone-950 text-white font-bold border-2 border-stone-800 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 text-base"
+                />
+              </div>
+
+              <div>
+                <label for="duration-range" class="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">
+                  Target Duration (Minutes)
+                </label>
+                <div class="flex items-center gap-3">
+                  <input
+                    id="duration-range"
+                    type="range"
+                    min="3"
+                    max="20"
+                    value="10"
+                    class="flex-1 accent-amber-400 bg-stone-950 h-2 rounded-lg"
+                  />
+                  <span id="duration-indicator" class="text-xl font-mono font-black text-amber-400 min-w-[3.5rem] text-right">
+                    10 min
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-stone-800/80">
+            <button id="generate-btn" class="w-full py-4 bg-amber-400 text-stone-950 hover:bg-amber-300 disabled:bg-stone-800 disabled:text-stone-500 font-black text-lg rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 min-h-[56px]">
+              <i data-lucide="dumbbell" class="w-5 h-5 stroke-[2.5]"></i>
+              <span id="generate-btn-text">Generate Custom Session</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Offline Quick Presets -->
+        <div class="bg-stone-900 border border-stone-800 rounded-3xl p-6 md:p-8 md:col-span-5 flex flex-col justify-between shadow-xl">
+          <div>
+            <div class="flex items-center gap-2.5 mb-4">
+              <div class="bg-amber-400/10 text-amber-400 p-2 rounded-xl">
+                <i data-lucide="dumbbell" class="w-5 h-5 text-amber-400"></i>
+              </div>
+              <h3 class="text-xl font-extrabold text-white font-display">Start a Preset Workout</h3>
+            </div>
+
+            <p class="text-stone-400 text-sm mb-6 leading-relaxed">
+              Instant launch workouts with pre-configured spatial voice guidance descriptors. Works perfectly offline.
+            </p>
+
+            <div id="presets-list" class="space-y-3.5">
+              <!-- Dynamically populated via javascript -->
+            </div>
+          </div>
+
+          <div class="mt-6 text-center">
+            <p class="text-xs text-stone-500 font-bold">
+              Or speak a command, e.g.: <span class="text-stone-300">"Load Morning Flow"</span>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- WORKOUT HISTORY LOG -->
+      <div id="history-section" class="bg-stone-900 border border-stone-800 rounded-3xl p-6 md:p-8 shadow-xl">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-stone-800">
+          <div class="flex items-center gap-2.5">
+            <div class="bg-amber-400/10 text-amber-400 p-2 rounded-xl">
+              <i data-lucide="history" class="w-5 h-5 text-amber-400"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-extrabold text-white font-display">Your Training History</h3>
+              <p class="text-xs text-stone-400">Log and review your accomplished routines</p>
+            </div>
+          </div>
+
+          <button id="clear-history-btn" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-xl text-xs font-bold transition-all">
+            Clear History
+          </button>
+        </div>
+
+        <div id="history-container">
+          <!-- Populated via Javascript -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Complete Javascript Speech, Sound, and Controller Logic -->
+  <script>
+    // PRESET WORKOUT DATA
+    const PRESET_WORKOUTS = [
+      {
+        title: "Gentle Morning Flow",
+        description: "A low-impact, 5-minute routine focusing on breathing, gentle joints stretching, and balance, perfect for waking up the body safely.",
+        totalDurationSeconds: 300,
+        exercises: [
+          {
+            id: "p1-1",
+            name: "Mindful Neck and Shoulder Roll",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Stand up tall with feet shoulder-width apart, arms hanging loose by your sides. Gently drop your chin towards your chest. Slowly roll your right ear to your right shoulder, then tilt your head back gently, then roll your left ear to your left shoulder. Breathe slowly. Let's do this clockwise and counter-clockwise.",
+            safetyTip: "Do not rush or force any tight spots. Keep your shoulders relaxed and low."
+          },
+          {
+            id: "p1-2",
+            name: "Standing Torso Twists",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Keep your feet wide and planted flat on the floor. Raise your elbows to shoulder height, bent, with your hands loose near your chest. Gently swing your upper body to the right, letting your back heel lift slightly, then swing to the left. Let your arms feel heavy and relaxed, tapping your waist as you turn.",
+            safetyTip: "Pivot on your back foot to protect your knees from twisting pressure."
+          },
+          {
+            id: "p1-3",
+            name: "Balanced Hip Openers",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Place your hands on your hips. Shift your weight onto your left leg, micro-bend that knee for balance. Lift your right knee up to hip level in front of you, then sweep it out to the right side like opening a door, then lower it back down to the floor. Alternate legs with each rep.",
+            safetyTip: "Keep your chest high and hold onto a sturdy wall or chair if you need support."
+          },
+          {
+            id: "p1-4",
+            name: "Standing Full-Body Stretch",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Interlace your fingers in front of you, turn your palms outward, and raise your arms up toward the ceiling. Stand on your tiptoes if you feel stable. Reach up as high as you can, feeling your spine stretch tall. Take deep breaths in and out.",
+            safetyTip: "Keep your neck relaxed. If you feel dizzy, keep your heels flat on the ground."
+          }
+        ]
+      },
+      {
+        title: "Cardio Core Booster",
+        description: "An active, 7-minute workout designed to elevate the heart rate, activate core muscles, and build stamina without any visual equipment.",
+        totalDurationSeconds: 420,
+        exercises: [
+          {
+            id: "p2-1",
+            name: "Marching High Knees",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Stand tall. March on the spot, lifting your knees up towards your waist level one after the other. Swing your opposite arm forward with each stride. Keep a steady, fast pace. Keep your chest high and core pulled in.",
+            safetyTip: "Lift your knees only as high as comfortable to maintain strong upright posture."
+          },
+          {
+            id: "p2-2",
+            name: "Standing Crunches",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Place your fingertips gently behind your ears, elbows wide to the side. Lift your right knee up and across your body while bringing your left elbow down to meet it in the middle, squeezing your stomach. Return to start, then repeat with left knee and right elbow.",
+            safetyTip: "Focus on pulling your ribs toward your hips, do not pull on your neck with your hands."
+          },
+          {
+            id: "p2-3",
+            name: "Shadow Boxing",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Bring your hands up by your face in a guard position, fists closed gently. Step one foot slightly forward. Alternate punching straight out in front of you. Punch with your left hand, then your right. Breathe out with each punch. Keep your knees bouncy.",
+            safetyTip: "Avoid locking your elbows out at the end of punches. Keep punches controlled."
+          },
+          {
+            id: "p2-4",
+            name: "Fast-Paced Windmills",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Spread your feet very wide. Stretch your arms straight out to the sides, level with your shoulders, forming a star shape. Slowly bend at your waist, reaching your left hand down toward your right foot while your right arm points up. Come back to center, then reach your right hand toward your left foot.",
+            safetyTip: "Keep a micro-bend in your knees. Only reach as low as your lower back is comfortable with."
+          },
+          {
+            id: "p2-5",
+            name: "Calm Down Belly Breathing",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Place both hands flat over your belly. Take a slow, deep breath in through your nose, feeling your belly push out into your hands. Hold for two seconds. Slowly blow the air out through your mouth, feeling your belly pull back in.",
+            safetyTip: "Let your shoulders drop down away from your ears with every exhale."
+          }
+        ]
+      },
+      {
+        title: "Balanced Lower Body",
+        description: "An 8-minute strength and stability workout emphasizing legs, glutes, and balance checkpoints.",
+        totalDurationSeconds: 480,
+        exercises: [
+          {
+            id: "p3-1",
+            name: "Descriptive Bodyweight Squat",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Stand with your feet slightly wider than your shoulders, toes pointed forward. Reach your arms straight out in front of you for balance. Imagine sitting down into a low chair behind you. Push your hips back, bend your knees, and lower down. Press through your feet to stand back up.",
+            safetyTip: "Ensure your weight is back in your heels and your knees do not push forward past your toes."
+          },
+          {
+            id: "p3-2",
+            name: "Calf Raises with Tiptoe Hold",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Place your feet close together, side-by-side. Hold your arms out to the sides for balance. Slowly roll your weight onto the balls of your feet, lifting your heels off the ground. Hold for one second at the peak, then slowly lower your heels back down.",
+            safetyTip: "If you feel unsteady, lightly touch a wall or a stable piece of furniture with one hand."
+          },
+          {
+            id: "p3-3",
+            name: "Single-Leg Balance Challenge",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Shift your weight entirely onto your left foot. Gently lift your right foot slightly off the floor, keeping your right knee bent. Hold this single-leg balance. Focus on the feeling of your left foot muscles micro-adjusting to keep you centered. Halfway through, we will switch legs.",
+            safetyTip: "Stand next to a wall or chair so you can touch it immediately if you begin to lose balance."
+          },
+          {
+            id: "p3-4",
+            name: "Reverse Step Lunges",
+            durationSeconds: 45,
+            restDurationSeconds: 15,
+            verbalInstruction: "Start with feet together, hands on hips. Take a slow, deliberate step backward with your right leg. Lift your back heel, bend both knees, and lower your hips down toward the floor until your front thigh is almost parallel to the floor. Step back forward to stand up. Repeat alternating legs.",
+            safetyTip: "Keep your upper body tall and upright, do not lean your chest forward."
+          }
+        ]
+      }
+    ];
+
+    // AUDIO CONTEXT & SYNTHESIZER
+    let audioCtx = null;
+    let jazzGainNode = null;
+
+    // Cozy jazz seventh chords
+    const JAZZ_CHORDS = [
+      {
+        name: "D Minor 9",
+        bass: [73.42, 110.00, 146.83, 130.81], // D2, A2, D3, C3
+        keys: [146.83, 174.61, 220.00, 261.63, 329.63] // D3, F3, A3, C4, E4
+      },
+      {
+        name: "G 13",
+        bass: [98.00, 146.83, 196.00, 174.61], // G2, D3, G3, F3
+        keys: [146.83, 174.61, 220.00, 246.94, 329.63] // D3, F3, A3, B3, E4
+      },
+      {
+        name: "C Major 9",
+        bass: [65.41, 98.00, 130.81, 117.47], // C2, G2, C3, B2
+        keys: [130.81, 164.81, 196.00, 246.94, 293.66] // C3, E3, G3, B3, D4
+      },
+      {
+        name: "A Minor 9",
+        bass: [110.00, 164.81, 220.00, 196.00], // A2, E3, A3, G3
+        keys: [130.81, 164.81, 196.00, 246.94, 329.63] // C3, E3, G3, B3, E4
+      }
+    ];
+
+    function playBeep(frequency = 440, duration = 0.15, type = "sine") {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Audio Context beep blocked or failed:", e);
+      }
+    }
+
+    // GENERATIVE JAZZ SYNTH VOICE ENGINE
+    function playEPianoNote(freq, startTime, duration, volume = 0.1) {
+      if (!audioCtx) return;
+      try {
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(freq, startTime);
+
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(freq * 0.998, startTime); // detune for chorus warmth
+
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        gainNode.connect(jazzGainNode);
+
+        osc1.start(startTime);
+        osc1.stop(startTime + duration);
+        osc2.start(startTime);
+        osc2.stop(startTime + duration);
+      } catch (err) {}
+    }
+
+    function playBassNote(freq, startTime, duration, volume = 0.15) {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        gainNode.gain.setValueAtTime(volume, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        osc.connect(gainNode);
+        gainNode.connect(jazzGainNode);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      } catch (err) {}
+    }
+
+    function playBrushCymbal(startTime, duration, volume = 0.04) {
+      if (!audioCtx) return;
+      try {
+        const bufferSize = audioCtx.sampleRate * duration;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        const noiseNode = audioCtx.createBufferSource();
+        noiseNode.buffer = buffer;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "highpass";
+        filter.frequency.setValueAtTime(8000, startTime);
+
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(volume, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        noiseNode.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(jazzGainNode);
+
+        noiseNode.start(startTime);
+        noiseNode.stop(startTime + duration);
+      } catch (err) {}
+    }
+
+    const JAZZ_ENGINE = {
+      isPlaying: false,
+      volume: 0.35, // mapped value
+      tempo: 110,
+      nextNoteTime: 0.0,
+      currentBeat: 0,
+      chordIdx: 0,
+      timerId: null,
+
+      init() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (!jazzGainNode) {
+          jazzGainNode = audioCtx.createGain();
+          jazzGainNode.gain.setValueAtTime(this.volume * 0.12, audioCtx.currentTime);
+          jazzGainNode.connect(audioCtx.destination);
+        }
+      },
+
+      setVolume(val) {
+        this.volume = val / 100;
+        this.init();
+        if (jazzGainNode) {
+          jazzGainNode.gain.setValueAtTime(this.volume * 0.12, audioCtx.currentTime);
+        }
+      },
+
+      start() {
+        this.init();
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        this.nextNoteTime = audioCtx.currentTime;
+        this.currentBeat = 0;
+        this.chordIdx = 0;
+
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+
+        this.scheduler();
+        
+        // Update UI
+        const btnText = document.getElementById("jazz-btn-text");
+        const icon = document.getElementById("jazz-icon");
+        if (btnText) btnText.innerText = "Jazz On";
+        if (icon) icon.classList.add("animate-bounce");
+      },
+
+      stop() {
+        this.isPlaying = false;
+        if (this.timerId) {
+          clearTimeout(this.timerId);
+          this.timerId = null;
+        }
+        
+        // Update UI
+        const btnText = document.getElementById("jazz-btn-text");
+        const icon = document.getElementById("jazz-icon");
+        if (btnText) btnText.innerText = "Jazz Off";
+        if (icon) icon.classList.remove("animate-bounce");
+      },
+
+      toggle() {
+        if (this.isPlaying) {
+          this.stop();
+          announce("Jazz background music paused.");
+        } else {
+          this.start();
+          announce("Jazz background music activated. Enjoy the cozy rhythmic vibe.");
+        }
+      },
+
+      scheduler() {
+        if (!this.isPlaying) return;
+
+        while (this.nextNoteTime < audioCtx.currentTime + 0.12) {
+          this.schedulePlay(this.currentBeat, this.nextNoteTime);
+          this.advanceBeat();
+        }
+
+        this.timerId = setTimeout(() => this.scheduler(), 25);
+      },
+
+      advanceBeat() {
+        const secondsPerBeat = 60.0 / this.tempo;
+        this.nextNoteTime += secondsPerBeat;
+
+        this.currentBeat++;
+        if (this.currentBeat >= 16) {
+          this.currentBeat = 0;
+        }
+
+        this.chordIdx = Math.floor(this.currentBeat / 4) % JAZZ_CHORDS.length;
+      },
+
+      schedulePlay(beat, time) {
+        const chord = JAZZ_CHORDS[this.chordIdx];
+        const beatInChord = beat % 4;
+
+        // 1. Walking bass on every beat
+        const bassFreq = chord.bass[beatInChord];
+        playBassNote(bassFreq, time, 0.45, 0.35);
+
+        // 2. EPiano chord on Beat 0, and light syncopated chord on Beat 2.66
+        if (beatInChord === 0) {
+          chord.keys.forEach((freq, idx) => {
+            playEPianoNote(freq, time, 1.8, 0.15 - (idx * 0.012));
+          });
+        } else if (beatInChord === 2) {
+          const swingDelay = (60.0 / this.tempo) * 0.66;
+          chord.keys.forEach((freq, idx) => {
+            playEPianoNote(freq, time + swingDelay, 0.8, 0.10 - (idx * 0.01));
+          });
+        }
+
+        // 3. Swing jazz brush ride pattern
+        playBrushCymbal(time, 0.07, 0.04);
+        if (beatInChord === 1 || beatInChord === 3) {
+          const swingDelay = (60.0 / this.tempo) * 0.66;
+          playBrushCymbal(time + swingDelay, 0.04, 0.02);
+        }
+      }
+    };
+
+    const soundEffects = {
+      startChime() {
+        const notes = [392.00, 523.25, 659.25]; // G4, C5, E5
+        notes.forEach((freq, i) => {
+          setTimeout(() => playBeep(freq, 0.25, "triangle"), i * 120);
+        });
+      },
+      pauseChime() {
+        playBeep(493.88, 0.1, "sine");
+        setTimeout(() => playBeep(329.63, 0.2, "sine"), 120);
+      },
+      successChime() {
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        notes.forEach((freq, i) => {
+          setTimeout(() => playBeep(freq, 0.4, "sine"), i * 100);
+        });
+      },
+      tick() {
+        playBeep(600, 0.05, "sine");
+      },
+      goBeep() {
+        playBeep(880, 0.3, "sine");
+      }
+    };
+
+    // SPEECH UTTERANCE STATE
+    let speechRate = 1.0;
+    const voiceEngine = {
+      speak(text, onEnd = null) {
+        if (!window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+
+        const cleanText = text.replace(/[*_`#\-]/g, " ").replace(/\s+/g, " ").trim();
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.rate = speechRate;
+        utterance.volume = 1.0;
+
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          const preferred = voices.find(v => v.lang.startsWith("en") && (v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Samantha")));
+          if (preferred) utterance.voice = preferred;
+        }
+
+        if (onEnd) {
+          utterance.onend = () => onEnd();
+          utterance.onerror = () => onEnd();
+        }
+
+        window.speechSynthesis.speak(utterance);
+      },
+      stop() {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+      }
+    };
+
+    // SPEECH COMMAND RECOGNITION
+    let recognition = null;
+    let isListening = false;
+
+    function setupSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        document.getElementById("toggle-mic-btn").style.display = "none";
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => {
+        isListening = true;
+        updateMicUI();
+        setVoiceStatus("Listening for commands...");
+        playBeep(880, 0.08);
+        setTimeout(() => playBeep(1046.5, 0.08), 100);
+      };
+
+      recognition.onresult = (event) => {
+        const resultText = event.results[0][0].transcript;
+        handleCommand(resultText);
+      };
+
+      recognition.onerror = (event) => {
+        isListening = false;
+        updateMicUI();
+        if (event.error === "no-speech") {
+          setVoiceStatus("No speech detected.");
+        } else {
+          setVoiceStatus("Voice input standby");
+        }
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        updateMicUI();
+      };
+    }
+
+    function toggleMicrophone() {
+      if (!recognition) return;
+      if (isListening) {
+        recognition.stop();
+      } else {
+        try {
+          recognition.start();
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+    }
+
+    function updateMicUI() {
+      const activeIcon = document.getElementById("mic-icon-active");
+      const inactiveIcon = document.getElementById("mic-icon-inactive");
+      const pingRing = document.getElementById("ping-ring");
+      const pulseDiv = document.getElementById("voice-pulse");
+      const btn = document.getElementById("toggle-mic-btn");
+
+      if (isListening) {
+        activeIcon.classList.remove("hidden");
+        inactiveIcon.classList.add("hidden");
+        pingRing.classList.remove("hidden");
+        pulseDiv.className = "relative flex items-center justify-center w-10 h-10 rounded-full bg-red-500/20 text-red-400 animate-pulse";
+        btn.className = "px-5 py-3 rounded-xl font-black text-sm flex items-center gap-2.5 transition-all shadow-md bg-red-500 text-white hover:bg-red-600 min-h-[48px]";
+      } else {
+        activeIcon.classList.remove("hidden");
+        inactiveIcon.classList.add("hidden");
+        pingRing.classList.add("hidden");
+        pulseDiv.className = "relative flex items-center justify-center w-10 h-10 rounded-full bg-stone-800 text-stone-400";
+        btn.className = "px-5 py-3 rounded-xl font-black text-sm flex items-center gap-2.5 transition-all shadow-md bg-amber-400 text-stone-950 hover:bg-amber-300 min-h-[48px]";
+      }
+    }
+
+    function setVoiceStatus(text) {
+      document.getElementById("voice-status-text").innerText = text;
+    }
+
+    // STATE CONTROL VARIABLES
+    let onboarded = false;
+    let workout = null;
+    let activeExerciseIndex = -1;
+    let isWorkoutActive = false;
+    let isPaused = false;
+    let phase = "prepare"; // prepare, active, rest
+    let timeLeft = 10;
+    let timerInterval = null;
+    let history = [];
+
+    // Screen Reader Announcer
+    function announce(text) {
+      const el = document.getElementById("sr-announcer");
+      el.innerText = text;
+      // Auto-speak using TTS
+      voiceEngine.speak(text);
+      
+      // Update Captions UI
+      const panel = document.getElementById("transcript-panel");
+      const body = document.getElementById("transcript-text");
+      panel.classList.remove("hidden");
+      body.innerText = text;
+    }
+
+    // ONBOARDING
+    function handleOnboard() {
+      soundEffects.startChime();
+      onboarded = true;
+
+      document.getElementById("onboard-screen").classList.add("hidden");
+      document.getElementById("app-zone").classList.remove("hidden");
+      document.getElementById("speed-controls").classList.remove("hidden");
+      document.getElementById("jazz-music-control").classList.remove("hidden");
+
+      // Auto start cozy ambient jazz music on a very soft default level
+      setTimeout(() => {
+        JAZZ_ENGINE.start();
+      }, 1000);
+
+      const welcomeMsg = "Welcome to Voice Fitness Trainer. This application is completely voice guided with a background jazz music track. Double tap your spacebar to speak. You can say Morning Flow, or say: generate an eight minute shoulder stretching routine. Say Help for all voice commands.";
+      announce(welcomeMsg);
+    }
+
+    // DISPATCH VOICE COMMANDS
+    function handleCommand(rawTranscript) {
+      const text = rawTranscript.toLowerCase().trim();
+      
+      // Jazz background music voice command routing
+      if (text.includes("jazz") || text.includes("music") || text.includes("groove")) {
+        if (text.includes("play") || text.includes("start") || text.includes("on") || text.includes("resume") || text.includes("enable")) {
+          JAZZ_ENGINE.start();
+          announce("Jazz background music activated. Enjoy your session!");
+          return;
+        } else if (text.includes("stop") || text.includes("pause") || text.includes("off") || text.includes("quiet") || text.includes("disable")) {
+          JAZZ_ENGINE.stop();
+          announce("Jazz background music paused.");
+          return;
+        } else if (text.includes("louder") || text.includes("volume up") || text.includes("increase")) {
+          const newVol = Math.min(100, Math.round(JAZZ_ENGINE.volume * 100) + 15);
+          JAZZ_ENGINE.setVolume(newVol);
+          document.getElementById("jazz-volume-slider").value = newVol;
+          announce("Jazz music volume increased to " + newVol + " percent.");
+          return;
+        } else if (text.includes("quieter") || text.includes("volume down") || text.includes("decrease") || text.includes("softer")) {
+          const newVol = Math.max(0, Math.round(JAZZ_ENGINE.volume * 100) - 15);
+          JAZZ_ENGINE.setVolume(newVol);
+          document.getElementById("jazz-volume-slider").value = newVol;
+          announce("Jazz music volume decreased to " + newVol + " percent.");
+          return;
+        }
+      }
+
+      if (text.includes("pause") || text.includes("hold") || text.includes("stop")) {
+        triggerPause();
+      } else if (text.includes("resume") || text.includes("continue") || text.includes("start")) {
+        triggerResume();
+      } else if (text.includes("skip") || text.includes("next")) {
+        triggerSkip();
+      } else if (text.includes("back") || text.includes("previous") || text.includes("go back")) {
+        triggerBack();
+      } else if (text.includes("repeat") || text.includes("explain") || text.includes("instruction")) {
+        triggerRepeat();
+      } else if (text.includes("faster") || text.includes("speed up")) {
+        adjustSpeechRate(0.2);
+      } else if (text.includes("slower") || text.includes("slow down")) {
+        adjustSpeechRate(-0.2);
+      } else if (text.includes("exit") || text.includes("quit") || text.includes("cancel") || text.includes("home")) {
+        triggerExit();
+      } else if (text.includes("help") || text.includes("what can i say")) {
+        triggerHelp();
+      } else if (text.includes("generate") || text.includes("create") || text.includes("make a")) {
+        // Extract minute count if specified
+        let min = 10;
+        const match = text.match(/\d+/);
+        if (match) min = parseInt(match[0]);
+
+        const cleanedPrompt = text.replace("generate", "").replace("create", "").replace("workout", "").replace("routine", "").trim();
+        triggerGenerate(cleanedPrompt || "custom exercise", min);
+      } else {
+        // Preset detection
+        if (text.includes("morning") || text.includes("flow") || text.includes("gentle")) {
+          startWorkout(PRESET_WORKOUTS[0]);
+        } else if (text.includes("cardio") || text.includes("core") || text.includes("booster")) {
+          startWorkout(PRESET_WORKOUTS[1]);
+        } else if (text.includes("lower") || text.includes("body") || text.includes("balance")) {
+          startWorkout(PRESET_WORKOUTS[2]);
+        } else {
+          // General custom workout request matching
+          let durationMin = 8;
+          const match = text.match(/\d+/);
+          if (match) durationMin = parseInt(match[0]);
+          triggerGenerate(text.replace(/\d+/g, "").replace("minute", "").trim(), durationMin);
+        }
+      }
+    }
+
+    // ACTIONS
+    function triggerPause() {
+      if (!isWorkoutActive || isPaused) return;
+      isPaused = true;
+      voiceEngine.stop();
+      soundEffects.pauseChime();
+      document.getElementById("pause-icon").classList.add("hidden");
+      document.getElementById("play-icon").classList.remove("hidden");
+      document.getElementById("pause-btn-text").innerText = "Resume (P Key)";
+      announce("Workout paused. Say resume or press the P key to continue.");
+    }
+
+    function triggerResume() {
+      if (!isWorkoutActive || !isPaused) return;
+      isPaused = false;
+      soundEffects.startChime();
+      document.getElementById("pause-icon").classList.remove("hidden");
+      document.getElementById("play-icon").classList.add("hidden");
+      document.getElementById("pause-btn-text").innerText = "Pause (P Key)";
+      announce("Resuming. Keep up the amazing work.");
+    }
+
+    function triggerSkip() {
+      if (!isWorkoutActive) return;
+      voiceEngine.stop();
+      playBeep(700, 0.15);
+
+      const isLast = activeExerciseIndex >= workout.exercises.length - 1;
+      if (isLast) {
+        completeWorkout();
+      } else {
+        activeExerciseIndex++;
+        setPhase("prepare");
+        timeLeft = 10;
+        const nextEx = workout.exercises[activeExerciseIndex];
+        announce("Skipped exercise. Prepare for " + nextEx.name + ". Instructions: " + nextEx.verbalInstruction + ". Starting in ten seconds.");
+        restartCountdown();
+      }
+    }
+
+    function triggerBack() {
+      if (!isWorkoutActive) return;
+      voiceEngine.stop();
+      playBeep(350, 0.15);
+
+      if (activeExerciseIndex > 0) {
+        activeExerciseIndex--;
+        setPhase("prepare");
+        timeLeft = 10;
+        const prevEx = workout.exercises[activeExerciseIndex];
+        announce("Going back. Prepare for " + prevEx.name + ". Instructions: " + prevEx.verbalInstruction + ". Starting in ten seconds.");
+        restartCountdown();
+      } else {
+        // Restart first
+        timeLeft = 10;
+        setPhase("prepare");
+        const firstEx = workout.exercises[0];
+        announce("Restarting session. Prepare for " + firstEx.name + ". Instructions: " + firstEx.verbalInstruction + ". Starting in ten seconds.");
+        restartCountdown();
+      }
+    }
+
+    function triggerRepeat() {
+      if (isWorkoutActive && workout) {
+        const ex = workout.exercises[activeExerciseIndex];
+        if (phase === "prepare") {
+          announce("Prepare for " + ex.name + ". Detailed instructions: " + ex.verbalInstruction);
+        } else if (phase === "active") {
+          announce("Doing " + ex.name + ". " + ex.verbalInstruction);
+        } else {
+          announce("Rest period. Breathing gently. Next exercise is " + (workout.exercises[activeExerciseIndex + 1]?.name || "Completion") + ".");
+        }
+      } else {
+        triggerHelp();
+      }
+    }
+
+    function triggerHelp() {
+      const helpText = "Here are the voice commands you can say at any time. Load morning flow, load cardio booster, or load lower body balance. Say generate followed by the minutes and focus to create custom sessions. During a session, you can say: pause, resume, repeat, skip, back, faster, slower, and exit.";
+      announce(helpText);
+    }
+
+    function adjustSpeechRate(diff) {
+      speechRate = Math.max(0.6, Math.min(2.0, speechRate + diff));
+      document.getElementById("speed-indicator").innerText = Math.round(speechRate * 100) + "%";
+      document.getElementById("speed-indicator").setAttribute("aria-label", "Current speech speed " + Math.round(speechRate * 100) + " percent");
+      announce("Speech speed set to " + Math.round(speechRate * 100) + " percent.");
+    }
+
+    function triggerExit() {
+      voiceEngine.stop();
+      if (timerInterval) clearInterval(timerInterval);
+      isWorkoutActive = false;
+      isPaused = false;
+      workout = null;
+      activeExerciseIndex = -1;
+
+      document.getElementById("player-screen").classList.add("hidden");
+      document.getElementById("home-dashboard").classList.remove("hidden");
+      document.getElementById("history-section").classList.remove("hidden");
+      announce("Returned to home dashboard. Ready for your next workout.");
+    }
+
+    // WORKOUT LIFECYCLE
+    function startWorkout(selectedWorkout) {
+      voiceEngine.stop();
+      if (timerInterval) clearInterval(timerInterval);
+
+      workout = selectedWorkout;
+      isWorkoutActive = true;
+      isPaused = false;
+      activeExerciseIndex = 0;
+      setPhase("prepare");
+      timeLeft = 10;
+
+      // Update badge visuals
+      document.getElementById("workout-title-badge").innerText = workout.title;
+      document.getElementById("home-dashboard").classList.add("hidden");
+      document.getElementById("history-section").classList.add("hidden");
+      document.getElementById("player-screen").classList.remove("hidden");
+
+      const firstEx = workout.exercises[0];
+      const startText = "Starting workout: " + workout.title + ". " + workout.description + " Let's prepare for the first movement: " + firstEx.name + ". Instructions: " + firstEx.verbalInstruction + ". Starting in ten seconds.";
+      announce(startText);
+
+      restartCountdown();
+    }
+
+    function restartCountdown() {
+      if (timerInterval) clearInterval(timerInterval);
+      updatePlayerUI();
+
+      timerInterval = setInterval(() => {
+        if (isPaused) return;
+
+        timeLeft--;
+        document.getElementById("timer-number").innerText = timeLeft;
+
+        if (timeLeft <= 3 && timeLeft > 0) {
+          soundEffects.tick();
+        }
+
+        if (timeLeft <= 0) {
+          handlePhaseTransition();
+        }
+
+        // Halfway coaching cue
+        if (phase === "active" && timeLeft === Math.floor(workout.exercises[activeExerciseIndex].durationSeconds / 2)) {
+          const ex = workout.exercises[activeExerciseIndex];
+          if (ex.safetyTip) {
+            voiceEngine.speak("Halfway there! Posture checkpoint: " + ex.safetyTip);
+          } else {
+            voiceEngine.speak("You are halfway through. Strong control!");
+          }
+        }
+
+      }, 1000);
+    }
+
+    function handlePhaseTransition() {
+      const currentEx = workout.exercises[activeExerciseIndex];
+
+      if (phase === "prepare") {
+        soundEffects.goBeep();
+        phase = "active";
+        timeLeft = currentEx.durationSeconds;
+        announce("Begin! Doing " + currentEx.name + " for " + currentEx.durationSeconds + " seconds.");
+        restartCountdown();
+      } else if (phase === "active") {
+        soundEffects.pauseChime();
+
+        const isLast = activeExerciseIndex >= workout.exercises.length - 1;
+        if (isLast) {
+          completeWorkout();
+        } else {
+          phase = "rest";
+          timeLeft = currentEx.restDurationSeconds;
+          const nextEx = workout.exercises[activeExerciseIndex + 1];
+          announce("Time's up. Rest for " + currentEx.restDurationSeconds + " seconds. Up next is: " + nextEx.name);
+          restartCountdown();
+        }
+      } else if (phase === "rest") {
+        activeExerciseIndex++;
+        phase = "prepare";
+        timeLeft = 10;
+        const nextEx = workout.exercises[activeExerciseIndex];
+        announce("Prepare for: " + nextEx.name + ". Instructions: " + nextEx.verbalInstruction + ". Starting in ten seconds.");
+        restartCountdown();
+      }
+    }
+
+    function completeWorkout() {
+      if (timerInterval) clearInterval(timerInterval);
+      isWorkoutActive = false;
+      soundEffects.successChime();
+
+      // Log to history
+      const logItem = {
+        id: Math.random().toString(36).substr(2, 9),
+        title: workout.title,
+        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+        durationSeconds: workout.totalDurationSeconds,
+        exerciseCount: workout.exercises.length
+      };
+      history.unshift(logItem);
+      localStorage.setItem("voice_fitness_history", JSON.stringify(history));
+      renderHistory();
+
+      announce("Workout completed successfully! Outstanding work. You completed " + workout.title + ". Your training progress has been stored securely. Say exit to go home.");
+      
+      document.getElementById("timer-number").innerText = "0";
+      document.getElementById("phase-label").innerText = "Completed";
+      document.getElementById("phase-label").className = "text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 inline-block bg-emerald-500 text-stone-950";
+    }
+
+    function updatePlayerUI() {
+      const ex = workout.exercises[activeExerciseIndex];
+      document.getElementById("exercise-progress-badge").innerText = "Exercise " + (activeExerciseIndex + 1) + " of " + workout.exercises.length;
+      document.getElementById("exercise-title").innerText = ex.name;
+      document.getElementById("timer-number").innerText = timeLeft;
+
+      const phaseLabel = document.getElementById("phase-label");
+      const phaseBar = document.getElementById("phase-bar");
+
+      if (phase === "prepare") {
+        phaseLabel.innerText = "Get Ready";
+        phaseLabel.className = "text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 inline-block bg-amber-400/20 text-amber-400 border border-amber-400/30";
+        phaseBar.className = "absolute top-0 inset-x-0 h-2.5 bg-amber-500";
+        document.getElementById("audio-script-text").innerText = "Get in position: " + ex.verbalInstruction;
+        document.getElementById("safety-tip-box").classList.add("hidden");
+      } else if (phase === "active") {
+        phaseLabel.innerText = "Active";
+        phaseLabel.className = "text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 inline-block bg-emerald-400/20 text-emerald-400 border border-emerald-400/30";
+        phaseBar.className = "absolute top-0 inset-x-0 h-2.5 bg-emerald-500";
+        document.getElementById("audio-script-text").innerText = "Do: " + ex.verbalInstruction;
+        
+        if (ex.safetyTip) {
+          document.getElementById("safety-tip-box").classList.remove("hidden");
+          document.getElementById("safety-tip-text").innerText = ex.safetyTip;
+        } else {
+          document.getElementById("safety-tip-box").classList.add("hidden");
+        }
+      } else {
+        phaseLabel.innerText = "Resting";
+        phaseLabel.className = "text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 inline-block bg-blue-400/20 text-blue-400 border border-blue-400/30";
+        phaseBar.className = "absolute top-0 inset-x-0 h-2.5 bg-blue-500";
+        document.getElementById("audio-script-text").innerText = "Rest and breathe softly. Hydrate if needed.";
+        document.getElementById("safety-tip-box").classList.add("hidden");
+      }
+    }
+
+    function setPhase(newPhase) {
+      phase = newPhase;
+    }
+
+    // CUSTOM WORKOUT BACKEND GENERATION (Express endpoint, proxying to Spring Boot controller API structure)
+    async function triggerGenerate(prompt, duration) {
+      const errBox = document.getElementById("api-error");
+      errBox.classList.add("hidden");
+      
+      const genBtn = document.getElementById("generate-btn");
+      const genText = document.getElementById("generate-btn-text");
+
+      genBtn.disabled = true;
+      genText.innerText = "Generating Voice Guide...";
+      announce("Contacting AI Coach. Compiling descriptive safety routines for " + prompt + " of " + duration + " minutes. Stand by for a few seconds.");
+
+      try {
+        const response = await fetch("/api/workout/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt, durationMinutes: duration })
+        });
+
+        if (!response.ok) throw new Error("Could not construct voice workout routine. Ensure your secret GEMINI_API_KEY is configured.");
+
+        const customWorkout = await response.json();
+        genBtn.disabled = false;
+        genText.innerText = "Generate Custom Session";
+        startWorkout(customWorkout);
+      } catch (e) {
+        genBtn.disabled = false;
+        genText.innerText = "Generate Custom Session";
+        errBox.classList.remove("hidden");
+        errBox.innerText = e.message;
+        announce("Sorry, I could not complete the voice synthesis request. " + e.message);
+      }
+    }
+
+    // HISTORY LOGS
+    function renderHistory() {
+      const container = document.getElementById("history-container");
+      if (history.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 bg-stone-950/40 rounded-2xl border border-stone-800 border-dashed">
+            <i data-lucide="award" class="w-10 h-10 text-stone-600 mx-auto mb-3"></i>
+            <p class="text-stone-400 font-bold text-base">No workouts logged yet</p>
+            <p class="text-xs text-stone-500 mt-1">Complete a workout session to log your dedication here!</p>
+          </div>
+        `;
+      } else {
+        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">';
+        history.forEach(item => {
+          html += `
+            <div class="bg-stone-950 p-4 rounded-2xl border border-stone-800/80 flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-bold font-mono text-amber-400 uppercase tracking-wider block">${item.date}</span>
+                <h4 class="font-extrabold text-white text-sm mt-1">${item.title}</h4>
+              </div>
+              <div class="flex items-center gap-3 mt-4 pt-3 border-t border-stone-900">
+                <span class="text-xs font-semibold text-stone-400 font-mono">${Math.round(item.durationSeconds / 60)} mins</span>
+                <span class="text-stone-700">•</span>
+                <span class="text-xs font-semibold text-stone-400 font-mono">${item.exerciseCount} exercises</span>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      }
+      lucide.createIcons();
+    }
+
+    function clearHistory() {
+      history = [];
+      localStorage.removeItem("voice_fitness_history");
+      renderHistory();
+      announce("History cleared.");
+    }
+
+    // BIND EVENT LISTENERS
+    window.addEventListener("DOMContentLoaded", () => {
+      // Load history
+      try {
+        const stored = localStorage.getItem("voice_fitness_history");
+        if (stored) history = JSON.parse(stored);
+      } catch (e) {}
+
+      // Initial layouts
+      renderHistory();
+
+      // Render preset list buttons
+      const presetsList = document.getElementById("presets-list");
+      PRESET_WORKOUTS.forEach((preset, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "w-full text-left bg-stone-950 hover:bg-stone-850 p-4 rounded-2xl border border-stone-800 hover:border-amber-400 transition-all flex items-center justify-between group";
+        btn.setAttribute("aria-label", "Load workout: " + preset.title + ". " + preset.totalDurationSeconds / 60 + " minutes.");
+        btn.innerHTML = `
+          <div class="pr-4">
+            <h4 class="font-extrabold text-white text-base group-hover:text-amber-400 transition-colors">${preset.title}</h4>
+            <p class="text-xs text-stone-400 mt-1 line-clamp-2">${preset.description}</p>
+            <span class="inline-block text-[11px] font-bold font-mono text-stone-500 mt-2 bg-stone-900 px-2 py-0.5 rounded border border-stone-800">
+              ${preset.totalDurationSeconds / 60} Mins • ${preset.exercises.length} Movements
+            </span>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-stone-500 group-hover:text-amber-400 flex-shrink-0 transition-colors"></i>
+        `;
+        btn.onclick = () => startWorkout(preset);
+        presetsList.appendChild(btn);
+      });
+
+      // Icon creation
+      lucide.createIcons();
+
+      // Speech Recognition setup
+      setupSpeechRecognition();
+
+      // Event handlers
+      document.getElementById("activate-btn").onclick = handleOnboard;
+      document.getElementById("help-btn").onclick = triggerHelp;
+      document.getElementById("toggle-mic-btn").onclick = toggleMicrophone;
+      document.getElementById("clear-history-btn").onclick = clearHistory;
+
+      // Jazz music button and slider bindings
+      document.getElementById("toggle-jazz-btn").onclick = () => {
+        JAZZ_ENGINE.toggle();
+      };
+      document.getElementById("jazz-volume-slider").oninput = (e) => {
+        const val = parseInt(e.target.value);
+        JAZZ_ENGINE.setVolume(val);
+      };
+
+      // Player Buttons
+      document.getElementById("prev-exercise-btn").onclick = triggerBack;
+      document.getElementById("pause-workout-btn").onclick = () => {
+        if (isPaused) {
+          triggerResume();
+        } else {
+          triggerPause();
+        }
+      };
+      document.getElementById("skip-exercise-btn").onclick = triggerSkip;
+      document.getElementById("exit-workout-btn").onclick = triggerExit;
+
+      // Speed rates buttons
+      document.getElementById("slow-down-btn").onclick = () => adjustSpeechRate(-0.2);
+      document.getElementById("speed-up-btn").onclick = () => adjustSpeechRate(0.2);
+
+      // Suggestions Buttons
+      document.querySelectorAll(".suggestion-btn").forEach(btn => {
+        btn.onclick = () => {
+          const p = btn.getAttribute("data-prompt");
+          const d = parseInt(btn.getAttribute("data-duration"));
+          document.getElementById("prompt-input").value = p;
+          document.getElementById("duration-range").value = d;
+          document.getElementById("duration-indicator").innerText = d + " min";
+          announce("Selected " + p);
+        };
+      });
+
+      // Range slider
+      document.getElementById("duration-range").oninput = (e) => {
+        document.getElementById("duration-indicator").innerText = e.target.value + " min";
+      };
+
+      // Form Generator submit
+      document.getElementById("generate-btn").onclick = () => {
+        const prompt = document.getElementById("prompt-input").value;
+        const duration = parseInt(document.getElementById("duration-range").value);
+        if (prompt.trim()) {
+          triggerGenerate(prompt, duration);
+        } else {
+          announce("Please input a focus area first.");
+        }
+      };
+
+      // Double-Tap Spacebar listener for hands-free voice commands
+      let lastSpaceTime = 0;
+      window.addEventListener("keydown", (e) => {
+        const targetTag = e.target.tagName.toLowerCase();
+        if (targetTag === "input" || targetTag === "textarea") return;
+
+        if (e.key === " ") {
+          e.preventDefault();
+          const now = Date.now();
+          if (now - lastSpaceTime < 350) {
+            toggleMicrophone();
+            lastSpaceTime = 0;
+          } else {
+            lastSpaceTime = now;
+          }
+        }
+
+        if (e.key.toLowerCase() === "p" && isWorkoutActive) {
+          e.preventDefault();
+          if (isPaused) triggerResume(); else triggerPause();
+        }
+
+        if (e.key.toLowerCase() === "n" && isWorkoutActive) {
+          e.preventDefault();
+          triggerSkip();
+        }
+
+        if (e.key.toLowerCase() === "b" && isWorkoutActive) {
+          e.preventDefault();
+          triggerBack();
+        }
+
+        if (e.key.toLowerCase() === "h") {
+          e.preventDefault();
+          triggerHelp();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
