@@ -868,6 +868,10 @@
       }
     }
 
+    function setVoiceStatus(text) {
+      document.getElementById("voice-status-text").innerText = text;
+    }
+
     // STATE CONTROL VARIABLES
     let onboarded = false;
     let workout = null;
@@ -1240,7 +1244,7 @@
       phase = newPhase;
     }
 
-    // CUSTOM WORKOUT BACKEND GENERATION
+    // CUSTOM WORKOUT BACKEND GENERATION (Express endpoint, proxying to Spring Boot controller API structure)
     async function triggerGenerate(prompt, duration) {
       const errBox = document.getElementById("api-error");
       errBox.classList.add("hidden");
