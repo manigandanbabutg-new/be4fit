@@ -2,12 +2,6 @@
 <img width="1200" height="475" alt="GHBanner" src="https://wallpaperaccess.com/full/3414990.jpg" />
 </div>
 
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/38d686fa-29db-40d6-b986-84e5544c875e
-
 ## Run Locally
 
 **Prerequisites:**  Node.js
