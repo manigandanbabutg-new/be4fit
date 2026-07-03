@@ -30,6 +30,34 @@
     }
   </style>
 </head>
+  <!-- PWA Install Overlay -->
+<div id="install-overlay"
+    class="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-[9999] hidden">
+
+    <div class="bg-stone-900 border border-stone-700 rounded-3xl p-8 text-center shadow-2xl max-w-md w-[90%]">
+
+        <div class="w-20 h-20 bg-amber-400 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="download" class="w-10 h-10 text-black"></i>
+        </div>
+
+        <h2 class="text-3xl font-bold text-white mb-3">
+            Install Voice Fitness
+        </h2>
+
+        <p class="text-stone-300 mb-8">
+            Install this app for a faster experience and offline access.
+        </p>
+
+        <button
+            id="install-btn"
+            class="bg-amber-400 hover:bg-amber-500 text-black font-bold px-8 py-4 rounded-xl transition text-lg w-full">
+
+            Install App
+
+        </button>
+
+    </div>
+</div>
 <body class="min-h-screen bg-stone-950 text-stone-100 flex flex-col relative selection:bg-amber-400 selection:text-stone-950">
 
   <!-- Accessible Screen Reader Announcement Live Region -->
@@ -345,6 +373,72 @@
 
   <!-- Complete Javascript Speech, Sound, and Controller Logic -->
   <script>
+
+    <!-- Your existing scripts -->
+
+<script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // ==========================
+    // PWA INSTALLATION SCRIPT
+    // ==========================
+
+    let deferredPrompt = null;
+
+    const installOverlay = document.getElementById("install-overlay");
+    const installBtn = document.getElementById("install-btn");
+
+    // Listen for the install event
+    window.addEventListener("beforeinstallprompt", (event) => {
+
+        // Stop the browser from showing its default install prompt
+        event.preventDefault();
+
+        // Save the event for later
+        deferredPrompt = event;
+
+        // Show your custom overlay
+        installOverlay.classList.remove("hidden");
+
+    });
+
+    // Install button click
+    installBtn.addEventListener("click", async () => {
+
+        if (!deferredPrompt) {
+            alert("Installation is not available yet.");
+            return;
+        }
+
+        // Show browser install popup
+        deferredPrompt.prompt();
+
+        // Wait for user choice
+        const { outcome } = await deferredPrompt.userChoice;
+
+        if (outcome === "accepted") {
+            console.log("User installed the app.");
+        } else {
+            console.log("User cancelled installation.");
+        }
+
+        // Hide overlay
+        installOverlay.classList.add("hidden");
+
+        deferredPrompt = null;
+
+    });
+
+    // Fired after successful installation
+    window.addEventListener("appinstalled", () => {
+
+        console.log("PWA Installed Successfully!");
+
+        installOverlay.classList.add("hidden");
+
+    });
+</script>
     // PRESET WORKOUT DATA
     const PRESET_WORKOUTS = [
       {
