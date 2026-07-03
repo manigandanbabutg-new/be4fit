@@ -29,8 +29,11 @@
       outline-offset: 4px !important;
     }
   </style>
-</head>
-  <!-- PWA Install Overlay -->
+  
+ 
+<body class="min-h-screen bg-stone-950 text-stone-100 flex flex-col relative selection:bg-amber-400 selection:text-stone-950">
+
+   <!-- PWA Install Overlay -->
 <div id="install-overlay"
     class="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-[9999] hidden">
 
@@ -55,10 +58,7 @@
             Install App
 
         </button>
-
-    </div>
 </div>
-<body class="min-h-screen bg-stone-950 text-stone-100 flex flex-col relative selection:bg-amber-400 selection:text-stone-950">
 
   <!-- Accessible Screen Reader Announcement Live Region -->
   <div id="sr-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
