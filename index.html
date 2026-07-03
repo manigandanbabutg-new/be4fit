@@ -20,49 +20,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500;800&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet" />
 
   <style>
-     /* Fullscreen Overlay Base */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      backdrop-filter: blur(20px) saturate(180%);
-      background: rgba(0,0,0,0.4);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 20;
-    }
-    .overlay-card {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(16px) saturate(160%);
-      border: 1px solid rgba(255,255,255,0.25);
-      padding: 24px;
-      border-radius: 20px;
-      text-align: center;
-      max-width: 280px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-      animation: fadeIn 0.5s ease;
-    }
-    .overlay-card h4 {
-      margin: 0 0 10px;
-      font-size: 18px;
-      font-weight: 600;
-    }
-    .overlay-card p {
-      margin: 0 0 16px;
-      font-size: 13px;
-      opacity: 0.9;
-    }
-    .overlay-card button {
-      border: 1px solid rgba(255,255,255,0.3);
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(10px);
-      color: #fff;
-      padding: 10px 18px;
-      border-radius: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+           
     .overlay-card button:hover {
       background: rgba(255,255,255,0.25);
     }
@@ -139,23 +97,6 @@
 
   <!-- Main Container -->
   <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-8 flex flex-col justify-center">
-
-    <!-- Install Overlay (Step 1) -->
-  <div class="overlay" id="installOverlay">
-      <div class="overlay-card">
-        <h4>Install Neuw-Bloom</h4>
-        <p>Experience seamless access from your home screen.</p>
-        <button id="installBtn">Install App</button>
-      </div>
-  </div>
-
-  <!-- Success Overlay (Step 2) -->
-  <div class="overlay" id="successOverlay" style="display:none;">
-      <div class="overlay-card">
-        <h4>🎉 Installed</h4>
-        <p>Check your home screen — Neuw-Bloom is ready!</p>
-      </div>
-  </div>
 
 
     <!-- STEP 1: Pre-onboard State -->
@@ -679,26 +620,6 @@ installBtn.addEventListener("click", async () => {
         installOverlay.style.display = "none";
 
     }
-
-    deferredPrompt = null;
-
-});
-
-// App installed successfully
-window.addEventListener("appinstalled", () => {
-
-    installOverlay.style.display = "none";
-
-    successOverlay.style.display = "flex";
-
-    setTimeout(() => {
-        successOverlay.style.display = "none";
-    }, 3000);
-
-    console.log("PWA Installed");
-
-});
-    
 
     function playBassNote(freq, startTime, duration, volume = 0.15) {
       if (!audioCtx) return;
