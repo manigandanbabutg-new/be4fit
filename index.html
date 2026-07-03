@@ -574,53 +574,6 @@
     }
     
 
-let deferredPrompt;
-
-const installOverlay = document.getElementById("installOverlay");
-const successOverlay = document.getElementById("successOverlay");
-const installBtn = document.getElementById("installBtn");
-
-// Hide install overlay initially
-installOverlay.style.display = "none";
-
-// Capture PWA install event
-window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-
-    deferredPrompt = e;
-
-    // Show custom install popup
-    installOverlay.style.display = "flex";
-});
-
-// Install button click
-installBtn.addEventListener("click", async () => {
-
-    if (!deferredPrompt) {
-        alert("Installation not available yet.");
-        return;
-    }
-
-    deferredPrompt.prompt();
-
-    const choiceResult = await deferredPrompt.userChoice;
-
-    if (choiceResult.outcome === "accepted") {
-
-        installOverlay.style.display = "none";
-
-        successOverlay.style.display = "flex";
-
-        setTimeout(() => {
-            successOverlay.style.display = "none";
-        }, 3000);
-
-    } else {
-
-        installOverlay.style.display = "none";
-
-    }
-
     function playBassNote(freq, startTime, duration, volume = 0.15) {
       if (!audioCtx) return;
       try {
