@@ -1,6 +1,6 @@
 {
-  "name": "Neuw-Bloom",
-  "short_name": "NeuwBloom",
+  "name": "blyfit",
+  "short_name": "fitness app",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f172a",
