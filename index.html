@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
@@ -43,7 +42,64 @@
  
 <body class="min-h-screen bg-stone-950 text-stone-100 flex flex-col relative selection:bg-amber-400 selection:text-stone-950">
 
-  
+  <!-- ================= PWA INSTALL OVERLAY ================= -->
+<div
+  id="pwa-overlay"
+  class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/70 backdrop-blur-md p-6">
+
+  <div
+    class="w-full max-w-md rounded-3xl border border-white/20
+           bg-white/10 backdrop-blur-2xl
+           shadow-2xl p-8 text-center">
+
+    <div
+      class="w-20 h-20 mx-auto rounded-full
+             bg-amber-400 text-stone-900
+             flex items-center justify-center shadow-xl">
+
+      <i data-lucide="download" class="w-10 h-10"></i>
+
+    </div>
+
+    <h2 class="text-3xl font-black mt-6 text-white">
+      Install App
+    </h2>
+
+    <p class="text-stone-300 mt-3 leading-relaxed">
+      Install Voice Fitness Trainer on your device for a faster,
+      full-screen experience and offline support.
+    </p>
+
+    <button
+      id="install-btn"
+      class="mt-8 w-full py-4
+             rounded-2xl
+             bg-amber-400
+             hover:bg-amber-300
+             text-stone-900
+             font-black
+             text-lg
+             transition">
+
+      Install App
+
+    </button>
+
+    <button
+      id="close-install-overlay"
+      class="mt-4 w-full py-3
+             rounded-xl
+             bg-stone-800
+             hover:bg-stone-700
+             text-white">
+
+      Continue in Browser
+
+    </button>
+
+  </div>
+
+</div>
 
   <!-- Accessible Screen Reader Announcement Live Region -->
   <div id="sr-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
@@ -1469,6 +1525,64 @@
         }
       });
     });
+
+    /* ==========================================
+      PWA INSTALL OVERLAY
+========================================== */
+
+let deferredPrompt = null;
+
+const overlay = document.getElementById("pwa-overlay");
+const installBtn = document.getElementById("install-btn");
+const closeOverlay = document.getElementById("close-install-overlay");
+
+window.addEventListener("beforeinstallprompt", (e) => {
+
+    e.preventDefault();
+
+    deferredPrompt = e;
+
+    overlay.classList.remove("hidden");
+    overlay.classList.add("flex");
+
+});
+
+installBtn.addEventListener("click", async () => {
+
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === "accepted") {
+
+        console.log("PWA Installed");
+
+    }
+
+    deferredPrompt = null;
+
+    overlay.classList.add("hidden");
+    overlay.classList.remove("flex");
+
+});
+
+closeOverlay.addEventListener("click", () => {
+
+    overlay.classList.add("hidden");
+    overlay.classList.remove("flex");
+
+});
+
+window.addEventListener("appinstalled", () => {
+
+    overlay.classList.add("hidden");
+    overlay.classList.remove("flex");
+
+    deferredPrompt = null;
+
+});
   </script>
 
 </body>
